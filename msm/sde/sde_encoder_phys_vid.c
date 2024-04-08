@@ -13,6 +13,8 @@
 #include "sde_trace.h"
 #include <drm/drm_fixed.h>
 
+#include "mi_sde_encoder.h"
+
 #define SDE_DEBUG_VIDENC(e, fmt, ...) SDE_DEBUG("enc%d intf%d " fmt, \
 		(e) && (e)->base.parent ? \
 		(e)->base.parent->base.id : -1, \
@@ -503,6 +505,8 @@ static void sde_encoder_phys_vid_vblank_irq(void *arg, int irq_idx)
 	if (!hw_ctl)
 		return;
 
+	mi_sde_encoder_save_vsync_info(phys_enc);
+
 	SDE_ATRACE_BEGIN("vblank_irq");
 
 	/*
@@ -610,6 +614,9 @@ static void sde_encoder_phys_vid_cont_splash_mode_set(
 	phys_enc->enable_state = SDE_ENC_ENABLED;
 
 	_sde_encoder_phys_vid_setup_irq_hw_idx(phys_enc);
+
+	phys_enc->kickoff_timeout_ms =
+		sde_encoder_helper_get_kickoff_timeout_ms(phys_enc->parent);
 }
 
 static void sde_encoder_phys_vid_mode_set(
